@@ -8,7 +8,7 @@ type (
 	}
 
 	RepositoryPostgres struct {
-		Address      string        `env:"ADDERSS" required:"true"`
+		Address      string        `env:"ADDRESS" required:"true"`
 		Username     string        `env:"USERNAME"`
 		Password     string        `env:"Password" required:"true"`
 		Name         string        `env:"Name" default:"catalog"`

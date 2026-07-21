@@ -1,5 +1,0 @@
-**/*Dockerfile
-.gitignore
-.idea
-**/*_mock_test.go
-**/*.bindata.go

@@ -26,8 +26,3 @@ coverage.out
 # ВАЖНО: В реальных проектах .env ДОЛЖЕН быть в .gitignore!
 # Секреты не должны попадать в репозиторий.
 # .env
-README.md
-
-.dockerignore
-
-cmd

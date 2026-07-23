@@ -18,18 +18,13 @@ type Config struct {
 var Root Config
 
 func Load() {
-	_ = godotenv.Load()
+
+	if err := godotenv.Load(); err != nil {
+		log.Printf("WARNING: .env file not found: %v", err)
+	}
 
 	if err := envconfig.Process("APP", &Root); err != nil {
 		log.Fatal("failed to load config: ", err)
 	}
-	if Root.Repository.Postgres.Address == "" {
-		log.Fatal("APP_REPOSITORY_POSTGRES_ADDRESS is required")
-	}
-	if Root.Repository.Postgres.Username == "" {
-		log.Fatal("APP_REPOSITORY_POSTGRES_USERNAME is required")
-	}
-	if Root.Repository.Postgres.Password == "" {
-		log.Fatal("APP_REPOSITORY_POSTGRES_PASSWORD is required")
-	}
+
 }

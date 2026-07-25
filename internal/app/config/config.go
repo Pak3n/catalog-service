@@ -10,9 +10,9 @@ import (
 )
 
 type Config struct {
-	Repository section.Repository `env:"REPOSITORY"`
-	Processor  section.Processor  `env:"PROCESSOR"`
-	Monitor    section.Monitor    `env:"MONITOR"`
+	Repository section.Repository
+	Processor  section.Processor
+	Monitor    section.Monitor
 }
 
 var Root Config

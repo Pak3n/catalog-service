@@ -4,7 +4,7 @@ import "time"
 
 type (
 	Repository struct {
-		Postgres RepositoryPostgres `env:"POSTGRES"`
+		Postgres RepositoryPostgres
 	}
 
 	RepositoryPostgres struct {

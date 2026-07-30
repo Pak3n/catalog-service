@@ -6,6 +6,6 @@ type (
 	}
 
 	ProcessorWebServer struct {
-		ListenPort uint32 `default:"8080"`
+		ListenPort uint32 `split_words:"true" default:"8080"`
 	}
 )

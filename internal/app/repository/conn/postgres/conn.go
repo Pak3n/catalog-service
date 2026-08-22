@@ -37,15 +37,14 @@ func NewClient(ctx context.Context, cfg section.RepositoryPostgres) (*Client, er
 	}
 	q := url.Values{}
 	q.Set("sslmode", "disable")
+	q.Set("read_timeout", cfg.ReadTimeout.String()) // ← добавляем read_timeout
+	q.Set("write_timeout", cfg.WriteTimeout.String())
 	u.RawQuery = q.Encode()
 
 	dsn := u.String()
 	log.Printf("ReadTimeout: %s, WriteTimeout: %s", cfg.ReadTimeout, cfg.WriteTimeout)
 
-	connector := pgdriver.NewConnector(
-		pgdriver.WithDSN(dsn),
-		pgdriver.WithTimeout(cfg.ReadTimeout),
-	)
+	connector := pgdriver.NewConnector(pgdriver.WithDSN(dsn))
 	sqlDB := sql.OpenDB(connector)
 	sqlDB.SetMaxOpenConns(10)
 

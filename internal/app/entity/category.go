@@ -1,0 +1,18 @@
+package entity
+
+import (
+	"time"
+
+	"github.com/gofrs/uuid"
+	"github.com/uptrace/bun"
+)
+
+type Category struct {
+	bun.BaseModel `bun:"table:category"`
+
+	ID        int64     `bun:"id,pk,autoincrement"`
+	GUID      uuid.UUID `bun:"guid,pk,notnull"`
+	Name      string    `bun:"name,notnull,unique"`
+	CreatedAt time.Time `bun:"created_at,notnull,default:now()"`
+	UpdatedAt time.Time `bun:"updated_at,notnull,default:now()"`
+}

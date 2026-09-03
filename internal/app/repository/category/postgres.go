@@ -45,10 +45,7 @@ func (r *repoPg) Update(ctx context.Context, category entity.Category) error {
 		WherePK().
 		ExcludeColumn("id", "created_at").
 		Exec(ctx)
-	if err != nil {
-		return err
-	}
-	return rcpostgres.UpdateErr(result, nil)
+	return rcpostgres.UpdateErr(result, err)
 }
 
 func (r *repoPg) Delete(ctx context.Context, guid uuid.UUID) error {

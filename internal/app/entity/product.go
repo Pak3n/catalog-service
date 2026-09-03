@@ -10,12 +10,12 @@ import (
 type Product struct {
 	bun.BaseModel `bun:"table:product"`
 
-	ID           int64     `bun:"id,pk,autoincrement"`
+	ID           int64     `bun:"id,autoincrement"`
 	GUID         uuid.UUID `bun:"guid,pk,notnull"`
 	CategoryGUID uuid.UUID `bun:"category_guid,notnull"`
 	Name         string    `bun:"name,notnull"`
-	Description  *string   `bun:"description"`              // указатель, может быть NULL
-	Price        *float64  `bun:"price,type:numeric(10,2)"` // указатель
+	Description  *string   `bun:"description"`
+	Price        int64     `bun:"price, notnull,check:price > 0"`
 	CreatedAt    time.Time `bun:"created_at,notnull,default:now()"`
 	UpdatedAt    time.Time `bun:"updated_at,notnull,default:now()"`
 }

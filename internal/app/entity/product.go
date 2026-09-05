@@ -15,7 +15,7 @@ type Product struct {
 	CategoryGUID uuid.UUID `bun:"category_guid,notnull"`
 	Name         string    `bun:"name,notnull"`
 	Description  *string   `bun:"description"`
-	Price        int64     `bun:"price, notnull,check:price > 0"`
+	Price        int64     `bun:"price"`
 	CreatedAt    time.Time `bun:"created_at,notnull,default:now()"`
 	UpdatedAt    time.Time `bun:"updated_at,notnull,default:now()"`
 }

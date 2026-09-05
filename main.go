@@ -30,6 +30,7 @@ func main() {
 	} else {
 		log.Printf("Database is up to date version=%d", newVer)
 	}
+
 	hHealth := rhealth.NewHandler()
 
 	httpServer := rprocessor.NewHTTP(hHealth, cfg.Processor.WebServer)

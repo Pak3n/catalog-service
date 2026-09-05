@@ -10,7 +10,7 @@ import (
 type Category struct {
 	bun.BaseModel `bun:"table:category"`
 
-	ID        int64     `bun:"id,pk,autoincrement"`
+	ID        int64     `bun:"id,autoincrement"`
 	GUID      uuid.UUID `bun:"guid,pk,notnull"`
 	Name      string    `bun:"name,notnull,unique"`
 	CreatedAt time.Time `bun:"created_at,notnull,default:now()"`

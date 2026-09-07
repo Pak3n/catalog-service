@@ -22,6 +22,6 @@ type (
 		GetByGUIDs(ctx context.Context, guids []uuid.UUID) ([]entity.Product, error)
 		Update(ctx context.Context, guid uuid.UUID, req entity.RequestProductUpdate) (entity.Product, error)
 		Delete(ctx context.Context, guid uuid.UUID) error
-		List(ctx context.Context, req entity.ResponseProductList) ([]entity.Product, error)
+		List(ctx context.Context, req entity.RequestProductList) ([]entity.Product, error)
 	}
 )

@@ -77,10 +77,13 @@ func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := entity.ResponseProductUpdate{
-		GUID:      product.GUID,
-		Name:      product.Name,
-		CreatedAt: product.CreatedAt,
-		UpdatedAt: product.UpdatedAt,
+		GUID:         product.GUID,
+		Name:         product.Name,
+		Description:  product.Description,
+		Price:        product.Price,
+		CategoryGUID: product.CategoryGUID,
+		CreatedAt:    product.CreatedAt,
+		UpdatedAt:    product.UpdatedAt,
 	}
 
 	httph.SendJSON(w, http.StatusOK, resp)
@@ -103,7 +106,7 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) List(w http.ResponseWriter, r *http.Request) {
-	var req entity.ResponseProductList
+	var req entity.RequestProductList
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httph.HandleError(w, entity.ErrIncorrectParameters)
 		return
@@ -118,10 +121,13 @@ func (h *handler) List(w http.ResponseWriter, r *http.Request) {
 	items := make([]entity.ResponseProductListItem, len(products))
 	for i, prod := range products {
 		items[i] = entity.ResponseProductListItem{
-			GUID:      prod.GUID,
-			Name:      prod.Name,
-			CreatedAt: prod.CreatedAt,
-			UpdatedAt: prod.UpdatedAt,
+			GUID:         prod.GUID,
+			Name:         prod.Name,
+			Description:  prod.Description,
+			Price:        prod.Price,
+			CategoryGUID: prod.CategoryGUID,
+			CreatedAt:    prod.CreatedAt,
+			UpdatedAt:    prod.UpdatedAt,
 		}
 	}
 

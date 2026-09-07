@@ -123,6 +123,6 @@ func (s *srv) Delete(ctx context.Context, guid uuid.UUID) error {
 	return s.repoProduct.Delete(ctx, guid)
 }
 
-func (s *srv) List(ctx context.Context, req entity.ResponseProductList) ([]entity.Product, error) {
+func (s *srv) List(ctx context.Context, req entity.RequestProductList) ([]entity.Product, error) {
 	return s.repoProduct.List(ctx, nil, req.CategoryGUID)
 }

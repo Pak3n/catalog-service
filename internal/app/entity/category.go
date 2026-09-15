@@ -16,26 +16,13 @@ type Category struct {
 	CreatedAt time.Time `bun:"created_at,notnull,default:now()"`
 	UpdatedAt time.Time `bun:"updated_at,notnull,default:now()"`
 }
-type RequestCategoryCreate struct {
-	Name string `json:"name"`
-}
 
-func (r RequestCategoryCreate) Validate() error {
-	if r.Name == "" {
-		return ErrIncorrectParameters
-	}
-	return nil
+type RequestCategoryCreate struct {
+	Name string `json:"name" binding:"required,min=2,max=255"`
 }
 
 type RequestCategoryUpdate struct {
-	Name string `json:"name"`
-}
-
-func (r RequestCategoryUpdate) Validate() error {
-	if r.Name != "" && len(r.Name) < 2 {
-		return ErrIncorrectParameters
-	}
-	return nil
+	Name string `json:"name" binding:"required,min=2,max=255"`
 }
 
 type ResponseCategoryCreate struct {

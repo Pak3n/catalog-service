@@ -12,6 +12,8 @@ type defaultValidator struct {
 	once     sync.Once
 }
 
+var _ StructValidator = &defaultValidator{}
+
 func (v *defaultValidator) lazyInit() {
 	v.once.Do(func() {
 		v.validate = validator.New()
@@ -19,13 +21,21 @@ func (v *defaultValidator) lazyInit() {
 	})
 }
 
+func (v *defaultValidator) Engine() any {
+	v.lazyInit()
+	return v.validate
+}
+
 func (v *defaultValidator) ValidateStruct(obj any) error {
+	// 1. nil — нечего валидировать
 	if obj == nil {
 		return nil
 	}
 
+	// 2. reflect.ValueOf — получаем Value
 	val := reflect.ValueOf(obj)
 
+	// 3. Если указатель — проверяем на nil и разыменовываем через Elem()
 	if val.Kind() == reflect.Ptr {
 		if val.IsNil() {
 			return nil
@@ -33,10 +43,12 @@ func (v *defaultValidator) ValidateStruct(obj any) error {
 		val = val.Elem()
 	}
 
+	// 4. Если не структура — нечего валидировать
 	if val.Kind() != reflect.Struct {
 		return nil
 	}
 
+	// 5. Ленивая инициализация и валидация
 	v.lazyInit()
-	return v.validate.Struct(obj) // ← вызываем валидатор, а не себя
+	return v.validate.Struct(obj)
 }

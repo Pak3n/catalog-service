@@ -27,17 +27,16 @@ type StructValidator interface {
 
 var Validator StructValidator = &defaultValidator{}
 
-func (v *defaultValidator) Engine() any {
-	v.lazyInit()
-	return v.validate
-}
-
 var (
 	bJSON  = jsonBinding{}
 	bQuery = queryBinding{}
 )
 
 func validate(obj any) error {
+	if Validator == nil {
+		return nil
+	}
+
 	if err := Validator.ValidateStruct(obj); err != nil {
 		return &bindingError{msg: err.Error()}
 	}

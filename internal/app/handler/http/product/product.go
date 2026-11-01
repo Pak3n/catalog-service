@@ -23,15 +23,14 @@ func NewHandler(srv service.Product) rhandler.Product {
 
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	var req entity.RequestProductCreate
-
 	if err := binding.ScanAndValidateJSON(r, &req); err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
 	product, err := h.srv.Create(r.Context(), req)
 	if err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
@@ -48,22 +47,21 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	guid, err := uuid.FromString(vars["guid"])
+	guid, err := uuid.FromString(mux.Vars(r)["guid"])
 	if err != nil {
-		httph.HandleError(w, entity.ErrIncorrectParameters)
+		httph.HandleError(w, r, entity.ErrIncorrectParameters)
 		return
 	}
 
 	var req entity.RequestProductUpdate
 	if err := binding.ScanAndValidateJSON(r, &req); err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
 	product, err := h.srv.Update(r.Context(), guid, req)
 	if err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
@@ -81,15 +79,14 @@ func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	guid, err := uuid.FromString(vars["guid"])
+	guid, err := uuid.FromString(mux.Vars(r)["guid"])
 	if err != nil {
-		httph.HandleError(w, entity.ErrIncorrectParameters)
+		httph.HandleError(w, r, entity.ErrIncorrectParameters)
 		return
 	}
 
 	if err := h.srv.Delete(r.Context(), guid); err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
@@ -98,32 +95,32 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) List(w http.ResponseWriter, r *http.Request) {
 	var req entity.RequestProductList
-	if err := binding.ScanAndValidateJSON(r, &req); err != nil {
-		httph.HandleError(w, err)
-		return
+	if r.Body != nil {
+		if err := binding.ScanAndValidateJSON(r, &req); err != nil {
+			httph.HandleError(w, r, err)
+			return
+		}
 	}
 
 	products, err := h.srv.List(r.Context(), req)
 	if err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
-	items := make([]entity.ResponseProductListItem, len(products))
-	for i, prod := range products {
-		items[i] = entity.ResponseProductListItem{
-			GUID:         prod.GUID,
-			Name:         prod.Name,
-			Description:  prod.Description,
-			Price:        prod.Price,
-			CategoryGUID: prod.CategoryGUID,
-			CreatedAt:    prod.CreatedAt,
-			UpdatedAt:    prod.UpdatedAt,
-		}
-	}
-
 	resp := entity.ResponseProductList{
-		Data: items,
+		Data: make([]entity.ResponseProductListItem, 0, len(products)),
+	}
+	for _, p := range products {
+		resp.Data = append(resp.Data, entity.ResponseProductListItem{
+			GUID:         p.GUID,
+			Name:         p.Name,
+			Description:  p.Description,
+			Price:        p.Price,
+			CategoryGUID: p.CategoryGUID,
+			CreatedAt:    p.CreatedAt,
+			UpdatedAt:    p.UpdatedAt,
+		})
 	}
 
 	httph.SendJSON(w, http.StatusOK, resp)

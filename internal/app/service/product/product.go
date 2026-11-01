@@ -63,7 +63,7 @@ func (s *srv) GetByGUIDs(ctx context.Context, guids []uuid.UUID) ([]entity.Produ
 }
 
 func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestProductUpdate) (entity.Product, error) {
-	products, err := s.GetByGUIDs(ctx, []uuid.UUID{guid})
+	products, err := s.repoProduct.GetByGUIDs(ctx, []uuid.UUID{guid})
 	if err != nil {
 		return entity.Product{}, err
 	}
@@ -77,15 +77,15 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestProd
 		if err != nil {
 			return entity.Product{}, err
 		}
-		for _, p := range existing {
-			if p.GUID != guid {
+		for _, e := range existing {
+			if e.GUID != guid {
 				return entity.Product{}, entity.ErrAlreadyExists
 			}
 		}
 		product.Name = req.Name
 	}
 
-	if req.CategoryGUID != uuid.Nil {
+	if !req.CategoryGUID.IsNil() {
 		categories, err := s.repoCategory.GetByGUIDs(ctx, []uuid.UUID{req.CategoryGUID})
 		if err != nil {
 			return entity.Product{}, err
@@ -99,9 +99,11 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestProd
 	if req.Description != nil {
 		product.Description = req.Description
 	}
+
 	if req.Price > 0 {
 		product.Price = req.Price
 	}
+
 	product.UpdatedAt = time.Now()
 
 	if err := s.repoProduct.Update(ctx, product); err != nil {
@@ -112,7 +114,7 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestProd
 }
 
 func (s *srv) Delete(ctx context.Context, guid uuid.UUID) error {
-	products, err := s.GetByGUIDs(ctx, []uuid.UUID{guid})
+	products, err := s.repoProduct.GetByGUIDs(ctx, []uuid.UUID{guid})
 	if err != nil {
 		return err
 	}

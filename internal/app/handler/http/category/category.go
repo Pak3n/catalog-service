@@ -24,13 +24,13 @@ func NewHandler(srv service.Category) rhandler.Category {
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	var req entity.RequestCategoryCreate
 	if err := binding.ScanAndValidateJSON(r, &req); err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
 	category, err := h.srv.Create(r.Context(), req)
 	if err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
@@ -44,22 +44,21 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	guid, err := uuid.FromString(vars["guid"])
+	guid, err := uuid.FromString(mux.Vars(r)["guid"])
 	if err != nil {
-		httph.HandleError(w, entity.ErrIncorrectParameters)
+		httph.HandleError(w, r, entity.ErrIncorrectParameters)
 		return
 	}
 
 	var req entity.RequestCategoryUpdate
 	if err := binding.ScanAndValidateJSON(r, &req); err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
 	category, err := h.srv.Update(r.Context(), guid, req)
 	if err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
@@ -74,15 +73,14 @@ func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	guid, err := uuid.FromString(vars["guid"])
+	guid, err := uuid.FromString(mux.Vars(r)["guid"])
 	if err != nil {
-		httph.HandleError(w, entity.ErrIncorrectParameters)
+		httph.HandleError(w, r, entity.ErrIncorrectParameters)
 		return
 	}
 
 	if err := h.srv.Delete(r.Context(), guid); err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
@@ -92,22 +90,20 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 func (h *handler) List(w http.ResponseWriter, r *http.Request) {
 	categories, err := h.srv.List(r.Context())
 	if err != nil {
-		httph.HandleError(w, err)
+		httph.HandleError(w, r, err)
 		return
 	}
 
-	items := make([]entity.ResponseCategoryListItem, len(categories))
-	for i, cat := range categories {
-		items[i] = entity.ResponseCategoryListItem{
-			GUID:      cat.GUID,
-			Name:      cat.Name,
-			CreatedAt: cat.CreatedAt,
-			UpdatedAt: cat.UpdatedAt,
-		}
-	}
-
 	resp := entity.ResponseCategoryList{
-		Data: items,
+		Data: make([]entity.ResponseCategoryListItem, 0, len(categories)),
+	}
+	for _, c := range categories {
+		resp.Data = append(resp.Data, entity.ResponseCategoryListItem{
+			GUID:      c.GUID,
+			Name:      c.Name,
+			CreatedAt: c.CreatedAt,
+			UpdatedAt: c.UpdatedAt,
+		})
 	}
 
 	httph.SendJSON(w, http.StatusOK, resp)

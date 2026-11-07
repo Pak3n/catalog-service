@@ -19,6 +19,10 @@ type (
 	_DB = rcpostgres.Client
 )
 
+type Product interface {
+	InsideTx(ctx context.Context, fn func(ctx context.Context) error) error
+}
+
 func NewRepoFromPostgres(client *rcpostgres.Client) repository.Product {
 	return &repoPg{_DB: client}
 }

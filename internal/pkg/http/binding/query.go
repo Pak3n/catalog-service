@@ -10,14 +10,22 @@ var formDecoder = form.NewDecoder()
 
 type queryBinding struct{}
 
+var _ Binding = queryBinding{}
+
 func (queryBinding) Name() string {
 	return "URL-QUERY"
 }
 
 func (queryBinding) Bind(req *http.Request, obj any) error {
 	values := req.URL.Query()
+
 	if err := formDecoder.Decode(obj, values); err != nil {
 		return &bindingError{msg: err.Error()}
 	}
-	return validate(obj)
+
+	if err := validate(obj); err != nil {
+		return &bindingError{msg: err.Error()}
+	}
+
+	return nil
 }

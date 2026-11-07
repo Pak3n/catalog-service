@@ -5,6 +5,7 @@ import "net/http"
 type Health interface {
 	LastCheck(w http.ResponseWriter, r *http.Request)
 }
+
 type (
 	Category interface {
 		Create(w http.ResponseWriter, r *http.Request)

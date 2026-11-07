@@ -11,9 +11,9 @@ type (
 		Address        string        `required:"true"`
 		Username       string        `required:"true"`
 		Password       string        `required:"true"`
-		Name           string        `default:"catalog" required:"true"`
-		ReadTimeout    time.Duration `default:"30s" split_words:"true"`
-		WriteTimeout   time.Duration `default:"30s" split_words:"true"`
+		Name           string        `required:"true"`
+		ReadTimeout    time.Duration `split_words:"true" default:"30s"`
+		WriteTimeout   time.Duration `split_words:"true" default:"30s"`
 		MigrationTable string        `split_words:"true" default:"schema_migrations"`
 	}
 )

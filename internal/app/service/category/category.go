@@ -23,7 +23,6 @@ func NewService(repoCategory repository.Category, repoProduct repository.Product
 	}
 }
 
-// Create — создание категории
 func (s *srv) Create(ctx context.Context, req entity.RequestCategoryCreate) (entity.Category, error) {
 	existing, err := s.repoCategory.List(ctx, &req.Name)
 	if err != nil {
@@ -53,7 +52,7 @@ func (s *srv) GetByGUIDs(ctx context.Context, guids []uuid.UUID) ([]entity.Categ
 }
 
 func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestCategoryUpdate) (entity.Category, error) {
-	categories, err := s.GetByGUIDs(ctx, []uuid.UUID{guid})
+	categories, err := s.repoCategory.GetByGUIDs(ctx, []uuid.UUID{guid})
 	if err != nil {
 		return entity.Category{}, err
 	}
@@ -66,8 +65,8 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestCate
 	if err != nil {
 		return entity.Category{}, err
 	}
-	for _, cat := range existing {
-		if cat.GUID != guid {
+	for _, e := range existing {
+		if e.GUID != guid {
 			return entity.Category{}, entity.ErrAlreadyExists
 		}
 	}
@@ -83,7 +82,7 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestCate
 }
 
 func (s *srv) Delete(ctx context.Context, guid uuid.UUID) error {
-	categories, err := s.GetByGUIDs(ctx, []uuid.UUID{guid})
+	categories, err := s.repoCategory.GetByGUIDs(ctx, []uuid.UUID{guid})
 	if err != nil {
 		return err
 	}

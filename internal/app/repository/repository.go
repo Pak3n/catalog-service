@@ -15,7 +15,6 @@ type (
 		Update(ctx context.Context, category entity.Category) error
 		Delete(ctx context.Context, guid uuid.UUID) error
 		List(ctx context.Context, name *string) ([]entity.Category, error)
-		InsideTx(ctx context.Context, fn func(ctx context.Context) error) error
 	}
 
 	Product interface {
@@ -24,6 +23,5 @@ type (
 		Update(ctx context.Context, product entity.Product) error
 		Delete(ctx context.Context, guid uuid.UUID) error
 		List(ctx context.Context, name *string, categoryGUID *uuid.UUID, minPrice, maxPrice *int64) ([]entity.Product, error)
-		InsideTx(ctx context.Context, fn func(ctx context.Context) error) error
 	}
 )

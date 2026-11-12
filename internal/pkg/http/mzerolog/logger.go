@@ -47,11 +47,9 @@ func (m *middleware) Callback(next http.Handler) http.Handler {
 		// TODO: Выберите уровень логирования
 		var ev *zerolog.Event
 		if err == nil {
-			// Успешный запрос: добавьте tailSuccess, используйте m.log.Debug()
 			ev = m.log.Debug()
 			mb.WriteString(tailSuccess)
 		} else {
-			// Ошибка: добавьте tailFail, используйте m.log.Error()
 			ev = m.log.Error()
 			mb.WriteString(tailFail)
 		}

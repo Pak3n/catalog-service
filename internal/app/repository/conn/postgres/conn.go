@@ -128,24 +128,29 @@ func (c *Client) InsideTx(ctx context.Context, fn func(ctx context.Context) erro
 
 	tx, err := c.rawBunDB.BeginTx(ctx, nil)
 	if err != nil {
-		log.Error().Err(err).Msg("InsideTx: failed to begin transaction")
-		return err
+		// Оборачиваем ошибку в контекст, чтобы было понятно, где упало
+		return fmt.Errorf("InsideTx: begin transaction: %w", err)
 	}
 
 	done := false
-
 	defer func() {
 		if !done {
+			// Ошибку Rollback'а просто игнорируем (или логируем на уровне Debug, если очень надо)
 			_ = tx.Rollback()
 		}
 	}()
 
 	ctx = setTxToContext(ctx, tx)
 	if err := fn(ctx); err != nil {
-		log.Error().Err(err).Msg("InsideTx: function returned error, rolling back")
+		// Возвращаем оригинальную бизнес-ошибку, чтобы хендлер её обработал
 		return err
 	}
 
 	done = true
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		// Оборачиваем ошибку коммита
+		return fmt.Errorf("InsideTx: commit: %w", err)
+	}
+
+	return nil
 }

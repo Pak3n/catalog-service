@@ -16,7 +16,6 @@ func newTxInjector(db bun.IDB) bun.IDB {
 	return &txInjector{fallback: db}
 }
 
-// getIDB — ядро прокси. Возвращает транзакцию из контекста или fallback.
 func (x *txInjector) getIDB(ctx context.Context) bun.IDB {
 	tx := getTxFromContext(ctx)
 	if tx.Tx != nil {
@@ -26,7 +25,6 @@ func (x *txInjector) getIDB(ctx context.Context) bun.IDB {
 }
 
 func (x *txInjector) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
-	// TODO: Получите нужный IDB через getIDB(ctx) и вызовите на нём ExecContext с теми же аргументами
 	db := x.getIDB(ctx)
 	return db.ExecContext(ctx, query, args...)
 }

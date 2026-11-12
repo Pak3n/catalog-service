@@ -69,7 +69,7 @@ func NewClient(ctx context.Context, cfg section.RepositoryPostgres) (*Client, er
 	log.Info().Msg("PostgreSQL connection established")
 
 	return &Client{
-		_bunDB:   bunDB,
+		_bunDB:   newTxInjector(bunDB),
 		rawBunDB: bunDB,
 		cfg:      cfg,
 	}, nil
@@ -118,4 +118,39 @@ func (c *Client) Migrate(ctx context.Context) (oldVer, newVer int64, err error) 
 	}
 
 	return oldVer, newVer, nil
+}
+
+func (c *Client) InsideTx(ctx context.Context, fn func(ctx context.Context) error) error {
+	tx := getTxFromContext(ctx)
+	if tx.Tx != nil {
+		return fn(ctx)
+	}
+
+	tx, err := c.rawBunDB.BeginTx(ctx, nil)
+	if err != nil {
+		// Оборачиваем ошибку в контекст, чтобы было понятно, где упало
+		return fmt.Errorf("InsideTx: begin transaction: %w", err)
+	}
+
+	done := false
+	defer func() {
+		if !done {
+			// Ошибку Rollback'а просто игнорируем (или логируем на уровне Debug, если очень надо)
+			_ = tx.Rollback()
+		}
+	}()
+
+	ctx = setTxToContext(ctx, tx)
+	if err := fn(ctx); err != nil {
+		// Возвращаем оригинальную бизнес-ошибку, чтобы хендлер её обработал
+		return err
+	}
+
+	done = true
+	if err := tx.Commit(); err != nil {
+		// Оборачиваем ошибку коммита
+		return fmt.Errorf("InsideTx: commit: %w", err)
+	}
+
+	return nil
 }

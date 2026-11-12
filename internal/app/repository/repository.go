@@ -12,7 +12,7 @@ type (
 	Transactional interface {
 		InsideTx(ctx context.Context, fn func(ctx context.Context) error) error
 	}
-	
+
 	Category interface {
 		Transactional
 		Create(ctx context.Context, category entity.Category) error

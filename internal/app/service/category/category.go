@@ -26,9 +26,7 @@ func NewService(repoCategory repository.Category, repoProduct repository.Product
 func (s *srv) Create(ctx context.Context, req entity.RequestCategoryCreate) (entity.Category, error) {
 	var category entity.Category
 
-	// Открываем транзакцию. Вся логика внутри.
 	err := s.repoCategory.InsideTx(ctx, func(ctx context.Context) error {
-		// 1. Проверка на существование (внутри транзакции!)
 		existing, err := s.repoCategory.List(ctx, &req.Name)
 		if err != nil {
 			return err
@@ -37,7 +35,6 @@ func (s *srv) Create(ctx context.Context, req entity.RequestCategoryCreate) (ent
 			return entity.ErrAlreadyExists
 		}
 
-		// 2. Создание сущности
 		now := time.Now()
 		category = entity.Category{
 			GUID:      uuid.Must(uuid.NewV4()),
@@ -46,7 +43,6 @@ func (s *srv) Create(ctx context.Context, req entity.RequestCategoryCreate) (ent
 			UpdatedAt: now,
 		}
 
-		// 3. Сохранение в БД
 		return s.repoCategory.Create(ctx, category)
 	})
 	if err != nil {
@@ -64,7 +60,6 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestCate
 	var updatedCategory entity.Category
 
 	err := s.repoCategory.InsideTx(ctx, func(ctx context.Context) error {
-		// 1. Получаем текущую категорию
 		categories, err := s.repoCategory.GetByGUIDs(ctx, []uuid.UUID{guid})
 		if err != nil {
 			return err
@@ -72,10 +67,8 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestCate
 		if len(categories) == 0 {
 			return entity.ErrNotFound
 		}
+		category := categories[0]
 
-		category := categories[0] // Берем существующую сущность
-
-		// 2. Проверяем уникальность нового имени (если оно меняется)
 		if req.Name != "" && req.Name != category.Name {
 			existing, err := s.repoCategory.List(ctx, &req.Name)
 			if err != nil {
@@ -86,18 +79,15 @@ func (s *srv) Update(ctx context.Context, guid uuid.UUID, req entity.RequestCate
 					return entity.ErrAlreadyExists
 				}
 			}
-			category.Name = req.Name // Обновляем имя
+			category.Name = req.Name
 		}
 
-		// 3. Обновляем время
 		category.UpdatedAt = time.Now()
 
-		// 4. Сохраняем в БД
 		if err := s.repoCategory.Update(ctx, category); err != nil {
 			return err
 		}
 
-		// 5. Сохраняем результат для возврата
 		updatedCategory = category
 		return nil
 	})

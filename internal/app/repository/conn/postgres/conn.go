@@ -128,27 +128,23 @@ func (c *Client) InsideTx(ctx context.Context, fn func(ctx context.Context) erro
 
 	tx, err := c.rawBunDB.BeginTx(ctx, nil)
 	if err != nil {
-		// Оборачиваем ошибку в контекст, чтобы было понятно, где упало
 		return fmt.Errorf("InsideTx: begin transaction: %w", err)
 	}
 
 	done := false
 	defer func() {
 		if !done {
-			// Ошибку Rollback'а просто игнорируем (или логируем на уровне Debug, если очень надо)
 			_ = tx.Rollback()
 		}
 	}()
 
 	ctx = setTxToContext(ctx, tx)
 	if err := fn(ctx); err != nil {
-		// Возвращаем оригинальную бизнес-ошибку, чтобы хендлер её обработал
 		return err
 	}
 
 	done = true
 	if err := tx.Commit(); err != nil {
-		// Оборачиваем ошибку коммита
 		return fmt.Errorf("InsideTx: commit: %w", err)
 	}
 

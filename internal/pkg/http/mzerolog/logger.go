@@ -36,15 +36,12 @@ func (m *middleware) Callback(next http.Handler) http.Handler {
 			return
 		}
 
-		// strings.Builder — эффективная сборка строки без промежуточных аллокаций.
-		// Grow(48 + ...) резервирует память заранее: ~48 байт на метод + хвост сообщения.
 		var mb strings.Builder
 		mb.Grow(48 + len(r.RequestURI))
 		mb.WriteString(r.Method)
 		mb.WriteByte(' ')
 		mb.WriteString(r.RequestURI)
 
-		// TODO: Выберите уровень логирования
 		var ev *zerolog.Event
 		if err == nil {
 			ev = m.log.Debug()

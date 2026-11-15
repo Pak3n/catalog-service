@@ -34,7 +34,6 @@ func createLogger(level zerolog.Level, output io.Writer) zerolog.Logger {
 }
 
 func Load(args LoadArgs) {
-	// Настройка полей
 	zerolog.TimestampFieldName = "timestamp"
 	zerolog.MessageFieldName = "msg"
 	zerolog.TimeFieldFormat = time.RFC3339
@@ -43,17 +42,14 @@ func Load(args LoadArgs) {
 		args.Output = zerolog.ConsoleWriter{Out: args.Output}
 	}
 
-	// Глобальный логгер
 	log.Logger = createLogger(zerolog.DebugLevel, args.Output)
 
 	log.Debug().Msg("Logger initialized with Debug level")
 
-	// Загрузка .env
 	if err := godotenv.Load(); err != nil {
 		log.Warn().Err(err).Msg("No .env file found")
 	}
 
-	// Парсинг конфига
 	if err := envconfig.Process("APP", &Root); err != nil {
 		log.Fatal().Err(err).Msg("Failed to load config")
 	}

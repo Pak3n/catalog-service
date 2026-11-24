@@ -2,18 +2,44 @@ package processor
 
 import (
 	"context"
+	"io"
 	"sync"
+	"time"
 )
 
+type (
+	CloserFunc        func() error
+	CloserContextFunc = func(ctx context.Context) error
+)
+
+func (f CloserFunc) Close() error {
+	return f()
+}
+
+func NewCloserContextFunc(
+	f CloserContextFunc,
+	ctx context.Context, timeout time.Duration,
+) CloserFunc {
+	return func() error {
+		if timeout > 0 {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, timeout)
+			defer cancel()
+		}
+		return f(ctx)
+	}
+}
+
+func WatchForShutdown(ctx context.Context, wg *sync.WaitGroup, closer io.Closer) {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		<-ctx.Done()
+		_ = closer.Close()
+	}()
+}
+
 func Wrap(ctx context.Context, wg *sync.WaitGroup, cb func(context.Context)) {
-	// TODO: Wrap запускает callback в отдельной горутине с учётом WaitGroup и контекста.
-	//
-	// Ожидаемое поведение:
-	// - Если wg передан (не nil), горутина должна быть учтена в WaitGroup
-	//   (увеличить счётчик перед запуском, уменьшить при завершении).
-	// - Перед выполнением cb проверяется контекст: если он уже отменён,
-	//   callback не выполняется — горутина сразу завершается.
-	// - Если контекст активен — вызывается cb(ctx).
 	if wg != nil {
 		wg.Add(1)
 	}

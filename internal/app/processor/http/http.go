@@ -77,10 +77,10 @@ func (p *httpProc) StartAsync(ctx context.Context, wg *sync.WaitGroup) {
 	}))
 
 	processor.WatchForShutdown(ctx, wg, processor.NewCloserContextFunc(
-		func(ctx context.Context) error {
-			return p.server.Shutdown(ctx)
+		func(closeCtx context.Context) error { // 1-й аргумент: функция
+			return p.server.Shutdown(closeCtx)
 		},
-		ctx,
+		context.Background(),
 		5*time.Second,
 	))
 }
